@@ -1,0 +1,24 @@
+{
+  "name": "auctioneer-socket",
+  "version": "0.0.0",
+  "description": "LTB Auctioneer Streamer",
+  "main": "redis-sockio-streamer.js",
+  "dependencies": {
+    "redis": "^0.11.0",
+    "socket.io": "^1.0.6"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/deweller/auctioneer-socket"
+  },
+  "author": "Devon Weller",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/deweller/auctioneer-socket/issues"
+  },
+  "homepage": "https://github.com/deweller/auctioneer-socket"
+}
