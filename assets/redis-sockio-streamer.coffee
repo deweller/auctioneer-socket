@@ -1,10 +1,11 @@
 ###
 #
-# This simple server listens for publish messages on the redis auction channel
+# This simple server listens for publish messages on a redis channel
 # and then pushes those to the connected socket.io clients
 #
 ###
 
+prefix = process.env.STREAMER_PREFIX or 'auction'
 socketioPort = process.env.SOCKET_IO_PORT or 8040
 redisPort = process.env.REDIS_PORT_6379_TCP_PORT or 6379
 redisHost = process.env.REDIS_PORT_6379_TCP_ADDR or '127.0.0.1'
@@ -22,20 +23,20 @@ io.on "connection", (socket) ->
         state: "connected"
     }
 
-    socket.on "listen", (auctionSlug)->
-        console.log "subscribing to auction-#{auctionSlug}"
-        redisClient.subscribe("auction-#{auctionSlug}")
+    socket.on "listen", (itemID)->
+        console.log "subscribing to #{prefix}-#{itemID}"
+        redisClient.subscribe("#{prefix}-#{itemID}")
 
         redisClient.on "message", (channel, message)->
             console.log "heard #{message}"
-            socket.emit 'auction-update', JSON.parse(message)
+            socket.emit "#{prefix}-update", JSON.parse(message)
             return
 
         redisClient.on "error", (e)->
             console.log "error",e
             socket.emit "status", {
                 state: "disconnected"
-                desc: "server disconnected from auction #{auctionSlug}"
+                desc: "server disconnected from #{prefix} #{itemID}"
             }
             return
 
@@ -43,7 +44,7 @@ io.on "connection", (socket) ->
             console.log "subscribed to #{channel}"
             socket.emit "status", {
                 state: "listening"
-                desc: "server connected to auction #{auctionSlug}"
+                desc: "server connected to #{prefix} #{itemID}"
             }
             return
 

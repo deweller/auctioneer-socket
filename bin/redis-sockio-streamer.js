@@ -2,13 +2,15 @@
 
 /*
  *
- * This simple server listens for publish messages on the redis auction channel
+ * This simple server listens for publish messages on a redis channel
  * and then pushes those to the connected socket.io clients
  *
  */
 
 (function() {
-  var io, redis, redisHost, redisPort, socketioPort;
+  var io, prefix, redis, redisHost, redisPort, socketioPort;
+
+  prefix = process.env.STREAMER_PREFIX || 'auction';
 
   socketioPort = process.env.SOCKET_IO_PORT || 8040;
 
@@ -30,25 +32,25 @@
     socket.emit("status", {
       state: "connected"
     });
-    socket.on("listen", function(auctionSlug) {
-      console.log("subscribing to auction-" + auctionSlug);
-      redisClient.subscribe("auction-" + auctionSlug);
+    socket.on("listen", function(itemID) {
+      console.log("subscribing to " + prefix + "-" + itemID);
+      redisClient.subscribe("" + prefix + "-" + itemID);
       redisClient.on("message", function(channel, message) {
         console.log("heard " + message);
-        socket.emit('auction-update', JSON.parse(message));
+        socket.emit("" + prefix + "-update", JSON.parse(message));
       });
       redisClient.on("error", function(e) {
         console.log("error", e);
         socket.emit("status", {
           state: "disconnected",
-          desc: "server disconnected from auction " + auctionSlug
+          desc: "server disconnected from " + prefix + " " + itemID
         });
       });
       redisClient.on("subscribe", function(channel) {
         console.log("subscribed to " + channel);
         socket.emit("status", {
           state: "listening",
-          desc: "server connected to auction " + auctionSlug
+          desc: "server connected to " + prefix + " " + itemID
         });
       });
     });
